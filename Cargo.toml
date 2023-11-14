@@ -3,6 +3,15 @@ name = "gst-dynamic-sink"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+anyhow = { version = "1", features = ["backtrace"] }
+bytes = "1"
+futures = "0.3"
+gst = { package = "gstreamer", version = "0.21", features = ["v1_20"] }
+gst-app = { package = "gstreamer-app", version = "0.21" }
+gst-pbutils = { package = "gstreamer-pbutils", version = "0.21", features = ["v1_20"] }
+gst-video = { package = "gstreamer-video", version = "0.21" }
+tokio = { version = "1", features = ["fs", "macros", "rt-multi-thread", "signal", "sync", "time"] }
+tokio-retry = "0.3"
+tracing = "0.1"
+tracing-subscriber = "0.3"

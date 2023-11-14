@@ -1,0 +1,5 @@
+[target.aarch64-apple-darwin]
+rustflags = [
+  # Find the GStreamer .pkg install location
+  "-C", "link-arg=-Wl,-rpath,/Library/Frameworks/GStreamer.framework/Versions/Current/lib"
+]

@@ -7,6 +7,6 @@ This example application adds and removes a 'snapshot' consumer sink which
 grabs a single frame from a pipeline, PNG-encodes it, and returns it via a
 channel.
 
-Running the application will reproduce the pipeline stall after a few or more
-snapshots are generated. CTRL-C should shutdown the application and dump debug
-pipeline to `debug.dot`.
+Running the application (`cargo run --release`) will reproduce the pipeline
+stall after a few or more snapshots are generated. CTRL-C should shutdown the
+application and dump debug pipeline to `debug.dot`.
