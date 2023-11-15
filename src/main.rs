@@ -1,6 +1,7 @@
 //! An example of a GStreamer pipeline which has sinks dynamically added and removed.
 
 use std::collections::HashSet;
+use std::pin::pin;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
@@ -10,7 +11,7 @@ use bytes::Bytes;
 use futures::StreamExt;
 use gst::prelude::*;
 use tokio::{
-    select,
+    select, signal,
     sync::{mpsc, oneshot},
     time::sleep,
 };
@@ -25,6 +26,7 @@ async fn main() -> Result<()> {
 
     let pipeline = Pipeline::videotestsrc().with_context(|| format!("failed to start pipeline"))?;
 
+    let mut ctrl_c = pin!(signal::ctrl_c());
     loop {
         tokio::select! {
             // Take a snapshot. This will add a consumer to the raw tee, grab a PNG encoded frame
@@ -37,7 +39,7 @@ async fn main() -> Result<()> {
                 // pipeline stall bug more reproducible.
                 sleep(Duration::from_secs(1)).await;
             }
-            _ = tokio::signal::ctrl_c() => break,
+            _ = &mut ctrl_c => break,
         }
     }
 
@@ -53,7 +55,7 @@ async fn main() -> Result<()> {
 
     tokio::select! {
         result = shutdown => result,
-        _ = tokio::signal::ctrl_c() => {
+        _ = signal::ctrl_c() => {
             bail!("second CTRL-C; exiting now!")
         }
     }
@@ -171,14 +173,25 @@ fn create_pipeline(source: gst::Element) -> Result<(gst::Pipeline, gst::Element)
         )
         .build()?;
 
+    let identity = gst::ElementFactory::make("identity")
+        .property("drop-allocation", true)
+        .build()?;
+
     let raw_tee = gst::ElementFactory::make("tee")
         .name("raw-tee")
         .property("allow-not-linked", true)
         .build()?;
 
-    pipeline.add_many([&source, &decode_bin, &video_convert, &raw_filter, &raw_tee])?;
+    pipeline.add_many([
+        &source,
+        &decode_bin,
+        &video_convert,
+        &raw_filter,
+        &identity,
+        &raw_tee,
+    ])?;
     gst::Element::link_many([&source, &decode_bin])?;
-    gst::Element::link_many([&video_convert, &raw_filter, &raw_tee])?;
+    gst::Element::link_many([&video_convert, &raw_filter, &identity, &raw_tee])?;
 
     // Connect to decodebin's pad-added signal, that is emitted whenever
     // it found another stream from the input file and found a way to decode it to its raw format.
