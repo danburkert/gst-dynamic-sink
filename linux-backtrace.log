@@ -1,0 +1,97 @@
+2033 >> sudo $(rustup which rust-gdb) -batch -ex 'set pagination off' -ex 'thread apply all bt' -p $(pgrep gst)
+[New LWP 3902516]
+[New LWP 3902517]
+[New LWP 3902518]
+[New LWP 3902598]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+38      ../sysdeps/unix/sysv/linux/x86_64/syscall.S: No such file or directory.
+
+Thread 5 (Thread 0x7f008c9dd640 (LWP 3902598) "snapshot-queue:"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x00007f008f15fb43 in g_cond_wait () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007f008d284069 in  () at /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstcoreelements.so
+#3  0x00007f008f30f127 in  () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#4  0x00007f008f1426b4 in  () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#5  0x00007f008f13fa51 in  () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#6  0x00007f008ea94ac3 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:442
+#7  0x00007f008eb26a40 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+
+Thread 4 (Thread 0x7f008d23d640 (LWP 3902518) "source:src"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x00007f008f15fb43 in g_cond_wait () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007f008f30f313 in  () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#3  0x00007f008f1426b4 in  () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#4  0x00007f008f13fa51 in  () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#5  0x00007f008ea94ac3 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:442
+#6  0x00007f008eb26a40 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+
+Thread 3 (Thread 0x7f008d671640 (LWP 3902517) "tokio-runtime-w"):
+#0  0x00007f008eb2601e in epoll_wait (epfd=3, events=0x564851a68600, maxevents=1024, timeout=-1) at ../sysdeps/unix/sysv/linux/epoll_wait.c:30
+#1  0x000056485190f29e in mio::sys::unix::selector::epoll::Selector::select ()
+#2  0x00005648518f0041 in _ZN5tokio7runtime2io6driver6Driver4turn17ha153f7a7d748fe2dE.llvm.6312148988351559911 ()
+#3  0x0000564851908f5b in _ZN5tokio7runtime4time6Driver13park_internal17h8d30c697c1b8b28bE.llvm.450498339541911054 ()
+#4  0x00005648518fa357 in tokio::runtime::scheduler::multi_thread::park::Parker::park ()
+#5  0x000056485190514f in tokio::runtime::scheduler::multi_thread::worker::Context::park_timeout ()
+#6  0x00005648519047d4 in tokio::runtime::scheduler::multi_thread::worker::Context::run ()
+#7  0x00005648518fcb6a in tokio::runtime::context::scoped::Scoped<T>::set ()
+#8  0x0000564851908462 in tokio::runtime::context::runtime::enter_runtime ()
+#9  0x0000564851903da8 in tokio::runtime::scheduler::multi_thread::worker::run ()
+#10 0x00005648518ec46a in tokio::runtime::task::core::Core<T,S>::poll ()
+#11 0x00005648518f8a4f in tokio::runtime::task::harness::Harness<T,S>::poll ()
+#12 0x000056485190674b in tokio::runtime::blocking::pool::Inner::run ()
+#13 0x00005648518ffbf3 in std::sys_common::backtrace::__rust_begin_short_backtrace ()
+#14 0x00005648518e843f in core::ops::function::FnOnce::call_once{{vtable.shim}} ()
+#15 0x0000564851975805 in alloc::boxed::{impl#45}::call_once<(), dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global> () at library/alloc/src/boxed.rs:1973
+#16 alloc::boxed::{impl#45}::call_once<(), alloc::boxed::Box<dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global>, alloc::alloc::Global> () at library/alloc/src/boxed.rs:1973
+#17 std::sys::unix::thread::{impl#2}::new::thread_start () at library/std/src/sys/unix/thread.rs:108
+#18 0x00007f008ea94ac3 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:442
+#19 0x00007f008eb26a40 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+
+Thread 2 (Thread 0x7f008d872640 (LWP 3902516) "tokio-runtime-w"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x0000564851976201 in std::sys::unix::futex::futex_wait () at library/std/src/sys/unix/futex.rs:62
+#2  std::sys::unix::locks::futex_condvar::Condvar::wait_optional_timeout () at library/std/src/sys/unix/locks/futex_condvar.rs:49
+#3  std::sys::unix::locks::futex_condvar::Condvar::wait () at library/std/src/sys/unix/locks/futex_condvar.rs:33
+#4  0x00005648518fa2c2 in tokio::runtime::scheduler::multi_thread::park::Parker::park ()
+#5  0x000056485190514f in tokio::runtime::scheduler::multi_thread::worker::Context::park_timeout ()
+#6  0x00005648519047d4 in tokio::runtime::scheduler::multi_thread::worker::Context::run ()
+#7  0x00005648518fcb6a in tokio::runtime::context::scoped::Scoped<T>::set ()
+#8  0x0000564851908462 in tokio::runtime::context::runtime::enter_runtime ()
+#9  0x0000564851903da8 in tokio::runtime::scheduler::multi_thread::worker::run ()
+#10 0x00005648518ec46a in tokio::runtime::task::core::Core<T,S>::poll ()
+#11 0x00005648518f8a4f in tokio::runtime::task::harness::Harness<T,S>::poll ()
+#12 0x000056485190674b in tokio::runtime::blocking::pool::Inner::run ()
+#13 0x00005648518ffbf3 in std::sys_common::backtrace::__rust_begin_short_backtrace ()
+#14 0x00005648518e843f in core::ops::function::FnOnce::call_once{{vtable.shim}} ()
+#15 0x0000564851975805 in alloc::boxed::{impl#45}::call_once<(), dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global> () at library/alloc/src/boxed.rs:1973
+#16 alloc::boxed::{impl#45}::call_once<(), alloc::boxed::Box<dyn core::ops::function::FnOnce<(), Output=()>, alloc::alloc::Global>, alloc::alloc::Global> () at library/alloc/src/boxed.rs:1973
+#17 std::sys::unix::thread::{impl#2}::new::thread_start () at library/std/src/sys/unix/thread.rs:108
+#18 0x00007f008ea94ac3 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:442
+#19 0x00007f008eb26a40 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+
+Thread 1 (Thread 0x7f008ec2ea00 (LWP 3902514) "gst-dynamic-sin"):
+#0  syscall () at ../sysdeps/unix/sysv/linux/x86_64/syscall.S:38
+#1  0x0000564851976201 in std::sys::unix::futex::futex_wait () at library/std/src/sys/unix/futex.rs:62
+#2  std::sys::unix::locks::futex_condvar::Condvar::wait_optional_timeout () at library/std/src/sys/unix/locks/futex_condvar.rs:49
+#3  std::sys::unix::locks::futex_condvar::Condvar::wait () at library/std/src/sys/unix/locks/futex_condvar.rs:33
+#4  0x00005648518eaab0 in _ZN5tokio7runtime4park5Inner4park17h592083ef150ae845E.llvm.2618857521239244332 ()
+#5  0x00005648518bb948 in tokio::runtime::park::CachedParkThread::block_on ()
+#6  0x00005648518bc576 in tokio::runtime::scheduler::multi_thread::MultiThread::block_on ()
+#7  0x00005648518b04ba in tokio::runtime::runtime::Runtime::block_on ()
+#8  0x00005648518ccef9 in gst_dynamic_sink::main ()
+#9  0x00005648518b8193 in std::sys_common::backtrace::__rust_begin_short_backtrace ()
+#10 0x00005648518b406d in _ZN3std2rt10lang_start28_$u7b$$u7b$closure$u7d$$u7d$17h11d34ea04cbe1ae4E.llvm.6746744179008050208 ()
+#11 0x000056485196b1be in core::ops::function::impls::{impl#2}::call_once<(), (dyn core::ops::function::Fn<(), Output=i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe)> () at library/core/src/ops/function.rs:287
+#12 std::panicking::try::do_call<&(dyn core::ops::function::Fn<(), Output=i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe), i32> () at library/std/src/panicking.rs:485
+#13 std::panicking::try<i32, &(dyn core::ops::function::Fn<(), Output=i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe)> () at library/std/src/panicking.rs:449
+#14 std::panic::catch_unwind<&(dyn core::ops::function::Fn<(), Output=i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe), i32> () at library/std/src/panic.rs:140
+#15 std::rt::lang_start_internal::{closure#2} () at library/std/src/rt.rs:148
+#16 std::panicking::try::do_call<std::rt::lang_start_internal::{closure_env#2}, isize> () at library/std/src/panicking.rs:485
+#17 std::panicking::try<isize, std::rt::lang_start_internal::{closure_env#2}> () at library/std/src/panicking.rs:449
+#18 std::panic::catch_unwind<std::rt::lang_start_internal::{closure_env#2}, isize> () at library/std/src/panic.rs:140
+#19 std::rt::lang_start_internal () at library/std/src/rt.rs:148
+#20 0x00005648518ccfd5 in main ()
+[Inferior 1 (process 3902514) detached]
+
