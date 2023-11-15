@@ -15,7 +15,7 @@ use tokio::{
     sync::{mpsc, oneshot},
     time::sleep,
 };
-use tracing::{debug, error, field, info, trace, warn};
+use tracing::{debug, error, field, info, warn};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -87,13 +87,13 @@ impl Pipeline {
 
     /// Creates a new `Pipeline` which uses the provided video source.
     fn with_source(source: gst::Element) -> Result<Pipeline> {
-        let (pipeline, raw_tee) = create_pipeline(source)?;
+        let (pipeline, source, raw_tee) = create_pipeline(source)?;
         pipeline.set_state(gst::State::Playing)?;
 
         let (send, mut recv_request) = mpsc::channel(1);
 
         tokio::spawn(async move {
-            if let Err(error) = run_pipeline(&pipeline, raw_tee, &mut recv_request).await {
+            if let Err(error) = run_pipeline(&pipeline, source, raw_tee, &mut recv_request).await {
                 error!(
                     error = format!("{error:#}"),
                     backtrace = %error.backtrace(),
@@ -150,7 +150,7 @@ impl Pipeline {
 
 /// Creates a new pipeline, as well as a tee containing raw video which can be used to add new
 /// sinks to the pipeline (see `link_tee` and `unlink_tee`).
-fn create_pipeline(source: gst::Element) -> Result<(gst::Pipeline, gst::Element)> {
+fn create_pipeline(source: gst::Element) -> Result<(gst::Pipeline, gst::Element, gst::Element)> {
     let pipeline = gst::Pipeline::builder()
         // Configure the pipeline to forward EOS message from sinks immediately and not hold it
         // back until it also got an EOS message from all other sinks. See `unlink_tee()` for why
@@ -203,12 +203,13 @@ fn create_pipeline(source: gst::Element) -> Result<(gst::Pipeline, gst::Element)
         }
     });
 
-    Ok((pipeline, raw_tee))
+    Ok((pipeline, source, raw_tee))
 }
 
 /// Returns a future which when polled will drive a pipeline.
 async fn run_pipeline(
     pipeline: &gst::Pipeline,
+    source: gst::Element,
     raw_tee: gst::Element,
     recv_request: &mut mpsc::Receiver<Request>,
 ) -> Result<()> {
@@ -330,6 +331,10 @@ async fn run_pipeline(
 
     let mut is_started = false;
 
+    let Some(src) = source.static_pad("src") else {
+        bail!("failed to get source pad");
+    };
+
     loop {
         let pipeline_state = pipeline.state(gst::ClockTime::default());
         let is_playing = pipeline_state.1 == gst::State::Playing;
@@ -341,6 +346,11 @@ async fn run_pipeline(
             "pipeline no longer playing: {pipeline_state:?}"
         );
         is_started |= is_playing;
+
+        let task_state = src.task_state();
+        if task_state != gst::TaskState::Started {
+            warn!(?task_state, "source task is not started");
+        }
 
         select! {
             message = messages.next() => handle_pipeline_bus_message(&mut flushing_bins, message)?,
