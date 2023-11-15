@@ -271,13 +271,9 @@ async fn run_pipeline(
             gst::MessageView::Latency(latency) => {
                 let element = latency.src().map(gst::Object::name).map(field::debug);
                 debug!(element, "recalculating latency");
-                // TODO: this appears to cause a pipeline stall ocassionally! What does it do? What
-                // is it for?
-                /*
                 if pipeline.recalculate_latency().is_err() {
                     warn!(element, "failed to recalculate latency");
                 }
-                */
             }
             gst::MessageView::StateChanged(state_changed) => {
                 debug!(
@@ -515,6 +511,9 @@ fn link_tee(pipeline: &gst::Pipeline, tee: &gst::Element, bin: &gst::Bin) -> Res
         sink_pad = ?sink_pad.name(),
         "linking bin to tee"
     );
+
+    bin.sync_state_with_parent()?;
+
     src_pad.link(&sink_pad).with_context(|| {
         format!(
             "failed to link tee consumer; src_caps: {:?}, sink_caps: {:?}",
@@ -522,8 +521,6 @@ fn link_tee(pipeline: &gst::Pipeline, tee: &gst::Element, bin: &gst::Bin) -> Res
             sink_pad.caps()
         )
     })?;
-
-    bin.sync_state_with_parent()?;
 
     // Send an event to tell all upstream producers of the tee to flush keyframes. Sinks with
     // muxers typically can only start working upon receiving the first keyframe, so this reduces
