@@ -269,7 +269,7 @@ async fn run_pipeline(
             }
             gst::MessageView::Latency(latency) => {
                 let element = latency.src().map(gst::Object::name).map(field::debug);
-                trace!(element, "recalculating latency");
+                debug!(element, "recalculating latency");
                 // TODO: this appears to cause a pipeline stall ocassionally! What does it do? What
                 // is it for?
                 /*
